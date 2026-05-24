@@ -1,43 +1,30 @@
-# SORSABSA - Whitelist de la Línea Pericial
-
-# 1. Bloqueo total por defecto (Ignora todas las verticales no mencionadas)
+# 1. Bloqueo total por defecto (Mantiene privado el Laboratorio y el Core)
 /*
 
-# 2. EXCEPCIONES: Proyectos de la Línea Pericial (SÍ se suben a GitHub)
+# 2. EXCEPCIONES: Línea Pericial (Fase 1 - Matriz de Servicios)
+!/.gitignore
+!/README.md
+!/SORSABSA Matriz de Servicios.md
+!/requirements.txt
 !/PeritoDigital/
-!/Conector/
 !/MemoryPalace/
+!/Conector/
 !/Scrapling/
 !/RedesSociales/
 !/mensajeria/
 
-# 3. EXCEPCIONES: Archivos de la raíz indispensables
-!/.gitignore
-!/README.md
-!/docker-compose.yml
-!/requirements.txt
-!/SORSABSA Arquitectura del Ecosistema.md
-!/SORSABSA Matriz de Servicios.md
-
-# 4. REGLAS DE SEGURIDAD Y LIMPIEZA
-# Estas reglas se aplican incluso dentro de las carpetas permitidas arriba
+# 3. REGLAS DE SEGURIDAD
 **/.env
-**/.env.supabase
-**/*.env
-**/__pycache__/
-**/*.py[cod]
-**/.venv/
-**/venv/
-**/node_modules/
-**/.npm
 **/*.db
 **/*.sqlite3
-**/.DS_Store
-**/Thumbs.db
+**/__pycache__/
 **/*.log
+.DS_Store
+Thumbs.db
 
-# 5. Bloqueo de datos dinámicos y temporales
+# 4. Datos dinámicos (Cerebro Forense)
+!/MemoryPalace/memory/knowledge/
 MemoryPalace/memory/knowledge/*
 !MemoryPalace/memory/knowledge/.gitkeep
-Conector/config/session.yaml
-Scrapling/*.csv
+
+# peritajes-forenses (Laboratorio) NO ESTÁ EN LA LISTA, por lo tanto queda BLOQUEADO.
