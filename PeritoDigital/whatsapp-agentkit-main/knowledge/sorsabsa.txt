@@ -1,0 +1,102 @@
+# SORSABSA - Información del Negocio
+# Peritaje Informático Forense y Ciberseguridad
+
+## Empresa
+Nombre: SORSABSA
+Sitio web: https://sorsabsa.com
+Especialidad: Peritaje Informático Forense y Ciberseguridad
+Experiencia: Más de 15 años en el sector
+Perito acreditada ante el Consejo de la Judicatura del Ecuador
+
+## Servicios Principales
+
+1. PERITAJE INFORMÁTICO FORENSE
+   - Análisis forense de dispositivos digitales (computadoras, celulares, tablets)
+   - Recuperación y análisis de evidencia digital para procesos judiciales
+   - Emisión de informes periciales con validez legal
+   - Peritaje para casos penales, civiles, laborales y de propiedad intelectual
+   - Imagen forense bit a bit
+   - Cálculo de valores hash (MD5, SHA1, SHA256)
+   - Análisis de metadatos
+   - Examen de dispositivos móviles
+
+2. TRANSCRIPCIONES DE AUDIO Y MENSAJERÍA
+   - Transcripción de audios de WhatsApp, Telegram y otras plataformas
+   - Transcripción asistida por inteligencia artificial para volúmenes masivos
+   - El cliente debe revisar y corregir transcripciones preliminares
+   - Corrección integral por la perito tiene costo adicional
+   - No se garantiza exactitud total en audios de baja calidad o con ruido
+
+3. CIBERSEGURIDAD
+   - Pentesting (pruebas de penetración)
+   - Auditorías de seguridad informática
+   - Análisis de vulnerabilidades
+
+4. DEFENSA TÉCNICA EN AUDIENCIA
+   - Ratificación del informe pericial
+   - Explicación metodológica ante el juez
+   - Absolución de interrogatorio y contrainterrogatorio
+
+5. CONSULTORÍA Y CAPACITACIÓN
+   - Asesoría técnica a estudios jurídicos
+   - Cursos y aula virtual para profesionales del derecho
+
+## Casos donde un abogado necesita un perito informático
+- Delitos informáticos (hacking, fraude electrónico, suplantación de identidad)
+- Disputas laborales con evidencia digital (correos, chats, archivos)
+- Propiedad intelectual (software, bases de datos, derechos de autor digitales)
+- Contratos digitales y firmas electrónicas
+- Recuperación de evidencia de dispositivos
+- Análisis de comunicaciones electrónicas (WhatsApp, correo, redes sociales)
+- Transcripción de audios para procesos judiciales
+
+## Honorarios y Pagos
+- Los honorarios se fijan según la tabla referencial del Consejo de la Judicatura
+- Dependen de: complejidad técnica, volumen de información, tipo de dispositivo
+- Modalidad de pago: 50% anticipo para iniciar, 50% al entregar el informe
+- Los precios no incluyen IVA
+- El informe se entrega con factura legalizada ante notario
+- Para estimación de costos: agendar consulta gratuita
+
+## Entrega de Informes
+- Se entregan 3 expedientes físicos foliados y firmados (cliente, autoridad judicial, contraparte)
+- Cada expediente incluye soporte digital (CD/DVD o memoria USB)
+- Expedientes adicionales: USD 30 por unidad
+- El informe no puede modificarse una vez emitido, salvo ampliación formal
+
+## Plazos
+- El plazo depende de la complejidad y volumen de información
+- Se define en cada caso específico
+- Puede ajustarse si se identifica mayor volumen durante el análisis
+
+## Ampliaciones
+- Ordenada por juez o fiscal: sin costo adicional
+- Solicitada por el cliente: 50% adicional del valor pactado
+
+## Viáticos
+- Si la pericia es fuera de la ciudad, se generan viáticos adicionales
+- Incluye: transporte, hospedaje, alimentación, movilización interna
+- Los viáticos son cubiertos por el cliente con 24 horas de anticipación
+
+## Cobertura
+- Quito, Pichincha (sede principal)
+- Latacunga, Cotopaxi
+- Ibarra, Imbabura
+- Disponible a nivel nacional (con viáticos)
+
+## Horario de Atención
+Lunes a Viernes: 8:00 - 18:00
+Sábados: 9:00 - 13:00
+
+## Contacto
+- WhatsApp: canal directo por este medio
+- Web: https://sorsabsa.com
+
+## INSTRUCCIONES PARA EL AGENTE
+- Cuando un cliente quiera agendar una consulta, NO confirmes una hora específica
+- Di: "Nuestro equipo se pondrá en contacto con usted a la brevedad para confirmar disponibilidad. ¿Nos puede dejar su nombre completo y el tipo de caso?"
+- Nunca des precios exactos — siempre invita a consulta gratuita
+- Si preguntan por transcripciones, explica que el cliente debe revisar las preliminares
+- Si el caso requiere viáticos, menciona que se presupuestan por separado
+- Siempre solicita: tipo de caso, jurisdicción y urgencia para orientar mejor
+- El informe pericial requiere factura legalizada ante notario — mencionarlo si preguntan por el proceso legal
