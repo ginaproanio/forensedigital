@@ -1,0 +1,39 @@
+# Variables de entorno con secretos
+.env
+
+# Credenciales de redes sociales
+*.token
+*.key
+credentials.json
+secrets/
+
+# Contenido generado
+content/published/*.json
+content/scheduled/*.json
+
+# Logs
+*.log
+logs/
+
+# Archivos temporales
+.tmp/
+temp/
+cache/
+
+# IDE
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env/
+
+# Node modules (si se instalan dependencias locales)
+node_modules/
+
+# Output de scripts
+output/
+exports/

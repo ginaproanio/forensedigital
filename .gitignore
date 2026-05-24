@@ -1,0 +1,43 @@
+# SORSABSA - Whitelist de la Línea Pericial
+
+# 1. Bloqueo total por defecto (Ignora todas las verticales no mencionadas)
+/*
+
+# 2. EXCEPCIONES: Proyectos de la Línea Pericial (SÍ se suben a GitHub)
+!/PeritoDigital/
+!/Conector/
+!/MemoryPalace/
+!/Scrapling/
+!/RedesSociales/
+!/mensajeria/
+
+# 3. EXCEPCIONES: Archivos de la raíz indispensables
+!/.gitignore
+!/README.md
+!/docker-compose.yml
+!/requirements.txt
+!/SORSABSA Arquitectura del Ecosistema.md
+!/SORSABSA Matriz de Servicios.md
+
+# 4. REGLAS DE SEGURIDAD Y LIMPIEZA
+# Estas reglas se aplican incluso dentro de las carpetas permitidas arriba
+**/.env
+**/.env.supabase
+**/*.env
+**/__pycache__/
+**/*.py[cod]
+**/.venv/
+**/venv/
+**/node_modules/
+**/.npm
+**/*.db
+**/*.sqlite3
+**/.DS_Store
+**/Thumbs.db
+**/*.log
+
+# 5. Bloqueo de datos dinámicos y temporales
+MemoryPalace/memory/knowledge/*
+!MemoryPalace/memory/knowledge/.gitkeep
+Conector/config/session.yaml
+Scrapling/*.csv

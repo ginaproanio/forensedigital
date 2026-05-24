@@ -1,0 +1,17 @@
+# Git y Docker
+.git
+.gitignore
+Dockerfile
+.dockerignore
+
+# Entornos virtuales y dependencias
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+
+# Datos y secretos
+.env
+*.db
+*.sqlite3

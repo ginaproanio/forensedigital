@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+*.db
+*.sqlite3
+knowledge/*
+!knowledge/.gitkeep
+config/session.yaml

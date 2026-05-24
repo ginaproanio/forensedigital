@@ -1,0 +1,16 @@
+# Git y Docker
+.git
+.gitignore
+Dockerfile
+.dockerignore
+
+# Entornos virtuales y dependencias
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Datos y resultados locales (se generan dentro o se montan)
+*.csv
+*.log
+.env

@@ -1,0 +1,15 @@
+{
+  "name": "@sorsabsa/mcp-server-meta-ads",
+  "version": "1.0.0",
+  "description": "MCP Server for Meta Ads Management",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.6.0",
+    "facebook-nodejs-business-sdk": "^21.0.0",
+    "dotenv": "^16.4.5"
+  }
+}

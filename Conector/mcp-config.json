@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/mcp-config",
+  "mcpServers": {
+    "meta-ads": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-meta-ads"],
+      "env": {
+        "META_APP_ID": "${env:META_APP_ID}",
+        "META_ACCESS_TOKEN": "${env:META_ACCESS_TOKEN}",
+        "META_AD_ACCOUNT_ID": "${env:META_AD_ACCOUNT_ID}"
+      }
+    }
+  }
+}
