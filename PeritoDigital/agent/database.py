@@ -1,5 +1,7 @@
 """Persistencia de conversaciones y deduplicación en PostgreSQL (Supabase)."""
 import os
+import urllib.parse as urlparse
+import re
 from datetime import datetime
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -16,26 +18,26 @@ engine_url = None
 connect_args = {}
 
 if DATABASE_URL:
-    # Extraer y limpiar la URL para asyncpg
-    if "?options=" in DATABASE_URL:
-        base_url, options_str = DATABASE_URL.split("?options=", 1)
-        # Parse options string, e.g., "-c%20search_path%3Dsorsabsa_identity"
-        if "search_path" in options_str:
-            # Esto es una simplificación, asumiendo el formato search_path=value
-            search_path_value = None
-            for opt_part in options_str.split('%20'): # dividir por espacio codificado
-                if 'search_path=' in opt_part:
-                    search_path_value = opt_part.split('search_path=')[1]
-                    break
-            if search_path_value:
-                connect_args["server_settings"] = {"search_path": search_path_value}
-        engine_url = base_url
-    else:
-        engine_url = DATABASE_URL
+    # Extraer y limpiar la URL para asyncpg usando parsing robusto
+    parsed_url = urlparse.urlparse(DATABASE_URL)
+    query_params = urlparse.parse_qs(parsed_url.query)
+    
+    if "options" in query_params:
+        options_val = query_params["options"][0]
+        # Buscar el search_path dentro del parámetro options (ej: "-c search_path=schema")
+        match = re.search(r'search_path=([^ &]+)', options_val)
+        if match:
+            connect_args["server_settings"] = {"search_path": match.group(1)}
+        # Eliminar 'options' para evitar el TypeError en el driver asyncpg
+        del query_params["options"]
+    
+    # Reconstruir la URL sin el parámetro 'options'
+    new_query = urlparse.urlencode(query_params, doseq=True)
+    engine_url = parsed_url._replace(query=new_query).geturl()
 
-    # Asegurar que SQLAlchemy use el driver asyncpg
-    if engine_url and engine_url.startswith("postgresql://"):
-        engine_url = engine_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    # Normalización forense del protocolo: soporta postgres:// y postgresql://
+    if engine_url:
+        engine_url = re.sub(r'^postgres(ql)?://', 'postgresql+asyncpg://', engine_url)
     
     engine = create_async_engine(engine_url, echo=False, connect_args=connect_args)
 else:

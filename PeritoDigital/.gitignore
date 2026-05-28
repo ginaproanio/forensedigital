@@ -17,8 +17,10 @@ env/
 dist/
 build/
 
-# Permitir knowledge en producción para que el agente tenga acceso a reglamentos y matriz
+# REGLA DE PERITAJE: Forzar inclusión de conocimiento legal y subcarpetas
 !knowledge/
+!knowledge/**
+!knowledge/reglamentos/*.txt
 
 # Archivos generados por Claude Code durante onboarding (temporal)
 # agent/
