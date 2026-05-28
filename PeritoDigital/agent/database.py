@@ -11,23 +11,33 @@ from dotenv import load_dotenv
 # Cargar variables de entorno
 load_dotenv()
 
-# Configuración de la Base de Datos desde .env
-DATABASE_URL = os.getenv("DATABASE_URL")
-# Asegurar que SQLAlchemy use el driver asyncpg
+# 1. Obtener y limpiar la variable de entorno
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+
 engine_url = None
 connect_args = {}
 
 if DATABASE_URL:
-    # Normalización forense: urlparse no identifica el netloc (host) si el esquema tiene '+'
-    # Convertimos temporalmente a un esquema estándar para limpiar los parámetros
-    temp_url = DATABASE_URL
-    original_scheme = DATABASE_URL.split("://")[0]
-    if "+" in original_scheme:
-        temp_url = DATABASE_URL.replace(original_scheme + "://", "postgresql://", 1)
+    # 2. Normalización de Esquema para parsing correcto
+    # urlparse falla con esquemas que contienen '+' (como postgresql+asyncpg)
+    # convirtiendo todo el host en parte del path.
+    clean_url = DATABASE_URL
+    if "://" in clean_url:
+        scheme_part = clean_url.split("://")[0]
+        clean_url = clean_url.replace(scheme_part + "://", "postgresql://", 1)
 
-    parsed_url = urlparse.urlparse(temp_url)
+    parsed_url = urlparse.urlparse(clean_url)
     query_params = urlparse.parse_qs(parsed_url.query)
     
+    # 3. Corrección de Host (Supabase usa .com, no .co)
+    hostname = parsed_url.hostname
+    if hostname and hostname.endswith(".supabase.co"):
+        hostname = hostname.replace(".supabase.co", ".supabase.com")
+    
+    if not hostname:
+        raise ValueError(f"No se pudo extraer el host de la URL: {DATABASE_URL}")
+
+    # 4. Manejo de 'options' para asyncpg
     if "options" in query_params:
         options_val = query_params["options"][0]
         match = re.search(r'search_path=([^ &]+)', options_val)
@@ -35,18 +45,17 @@ if DATABASE_URL:
             connect_args["server_settings"] = {"search_path": match.group(1)}
         del query_params["options"]
     
-    # Mapeo de SSL: asyncpg requiere un modo (require) en lugar de un booleano (true)
+    # 5. Mapeo de SSL (asyncpg requiere 'require')
     if "ssl" in query_params:
-        # Independientemente de lo que venga, si es producción Supabase/Railway, forzamos require
         query_params["ssl"] = ["require"]
     
-    # Reconstruir la URL sin el parámetro 'options'
+    # 6. Reconstrucción de la URL final con el driver asyncpg
     new_query = urlparse.urlencode(query_params, doseq=True)
-    engine_url = parsed_url._replace(query=new_query).geturl()
-
-    # Normalización forense del protocolo: soporta postgres:// y postgresql://
-    engine_url = engine_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    engine_url = engine_url.replace("postgres://", "postgresql+asyncpg://", 1)
+    
+    # Construir manualmente para evitar errores de urlunparse con puertos y credenciales
+    port_str = f":{parsed_url.port}" if parsed_url.port else ""
+    auth_str = f"{parsed_url.username}:{parsed_url.password}@" if parsed_url.username else ""
+    engine_url = f"postgresql+asyncpg://{auth_str}{hostname}{port_str}{parsed_url.path}?{new_query}"
 
     engine = create_async_engine(engine_url, echo=False, connect_args=connect_args)
 else:
