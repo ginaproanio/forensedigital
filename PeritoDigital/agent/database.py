@@ -37,13 +37,18 @@ if DATABASE_URL:
     if not hostname:
         raise ValueError(f"No se pudo extraer el host de la URL: {DATABASE_URL}")
 
-    # 4. Manejo de 'options' para asyncpg
+    # 4. Manejo de parámetros conflictivos para asyncpg
+    # Extraer search_path de 'options'
     if "options" in query_params:
         options_val = query_params["options"][0]
         match = re.search(r'search_path=([^ &]+)', options_val)
         if match:
             connect_args["server_settings"] = {"search_path": match.group(1)}
         del query_params["options"]
+    
+    # asyncpg no tolera pgbouncer=true en la URL, lo eliminamos si existe
+    if "pgbouncer" in query_params:
+        del query_params["pgbouncer"]
     
     # 5. Mapeo de SSL (asyncpg requiere 'require')
     if "ssl" in query_params:
@@ -54,8 +59,17 @@ if DATABASE_URL:
     
     # Construir manualmente para evitar errores de urlunparse con puertos y credenciales
     port_str = f":{parsed_url.port}" if parsed_url.port else ""
-    auth_str = f"{parsed_url.username}:{parsed_url.password}@" if parsed_url.username else ""
+    
+    # Manejo robusto de credenciales para evitar el string 'None'
+    user_part = parsed_url.username or ""
+    pass_part = f":{parsed_url.password}" if parsed_url.password else ""
+    auth_str = f"{user_part}{pass_part}@" if user_part else ""
+    
     engine_url = f"postgresql+asyncpg://{auth_str}{hostname}{port_str}{parsed_url.path}?{new_query}"
+
+    # LOG DE AUDITORÍA: Verificar host y usuario en logs de Railway sin exponer password
+    obfuscated_url = f"postgresql+asyncpg://{parsed_url.username}:****@{hostname}{port_str}{parsed_url.path}"
+    print(f"🔍 [DATABASE] Intentando conexión a: {obfuscated_url}")
 
     engine = create_async_engine(engine_url, echo=False, connect_args=connect_args)
 else:
