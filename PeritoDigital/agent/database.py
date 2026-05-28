@@ -12,10 +12,35 @@ load_dotenv()
 # Configuración de la Base de Datos desde .env
 DATABASE_URL = os.getenv("DATABASE_URL")
 # Asegurar que SQLAlchemy use el driver asyncpg
-if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+engine_url = None
+connect_args = {}
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+if DATABASE_URL:
+    # Extraer y limpiar la URL para asyncpg
+    if "?options=" in DATABASE_URL:
+        base_url, options_str = DATABASE_URL.split("?options=", 1)
+        # Parse options string, e.g., "-c%20search_path%3Dsorsabsa_identity"
+        if "search_path" in options_str:
+            # Esto es una simplificación, asumiendo el formato search_path=value
+            search_path_value = None
+            for opt_part in options_str.split('%20'): # dividir por espacio codificado
+                if 'search_path=' in opt_part:
+                    search_path_value = opt_part.split('search_path=')[1]
+                    break
+            if search_path_value:
+                connect_args["server_settings"] = {"search_path": search_path_value}
+        engine_url = base_url
+    else:
+        engine_url = DATABASE_URL
+
+    # Asegurar que SQLAlchemy use el driver asyncpg
+    if engine_url and engine_url.startswith("postgresql://"):
+        engine_url = engine_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    
+    engine = create_async_engine(engine_url, echo=False, connect_args=connect_args)
+else:
+    raise ValueError("DATABASE_URL no está configurada en las variables de entorno.")
+
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 class Base(DeclarativeBase):

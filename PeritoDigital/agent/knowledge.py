@@ -11,7 +11,7 @@ def cargar_conocimiento() -> str:
     ruta_conocimiento = os.getenv("MEMORY_PALACE_PATH", "knowledge/")
     contenido_total = ""
     
-    if not os.path.exists(ruta_conocimiento):
+    if not os.path.exists(ruta_conocimiento) or not os.path.isdir(ruta_conocimiento):
         logger.error(f"❌ No se encontró la carpeta de conocimiento en: {ruta_conocimiento}")
         return "Información básica de SORSABSA no disponible."
 
