@@ -18,21 +18,26 @@ engine_url = None
 connect_args = {}
 
 if DATABASE_URL:
-    # Extraer y limpiar la URL para asyncpg usando parsing robusto
-    parsed_url = urlparse.urlparse(DATABASE_URL)
+    # Normalización forense: urlparse no identifica el netloc (host) si el esquema tiene '+'
+    # Convertimos temporalmente a un esquema estándar para limpiar los parámetros
+    temp_url = DATABASE_URL
+    original_scheme = DATABASE_URL.split("://")[0]
+    if "+" in original_scheme:
+        temp_url = DATABASE_URL.replace(original_scheme + "://", "postgresql://", 1)
+
+    parsed_url = urlparse.urlparse(temp_url)
     query_params = urlparse.parse_qs(parsed_url.query)
     
     if "options" in query_params:
         options_val = query_params["options"][0]
-        # Buscar el search_path dentro del parámetro options (ej: "-c search_path=schema")
         match = re.search(r'search_path=([^ &]+)', options_val)
         if match:
             connect_args["server_settings"] = {"search_path": match.group(1)}
-        # Eliminar 'options' para evitar el TypeError en el driver asyncpg
         del query_params["options"]
     
-    # Mapeo forense: asyncpg no acepta ssl=true, requiere un modo específico
-    if "ssl" in query_params and query_params["ssl"][0].lower() == "true":
+    # Mapeo de SSL: asyncpg requiere un modo (require) en lugar de un booleano (true)
+    if "ssl" in query_params:
+        # Independientemente de lo que venga, si es producción Supabase/Railway, forzamos require
         query_params["ssl"] = ["require"]
     
     # Reconstruir la URL sin el parámetro 'options'
@@ -40,12 +45,12 @@ if DATABASE_URL:
     engine_url = parsed_url._replace(query=new_query).geturl()
 
     # Normalización forense del protocolo: soporta postgres:// y postgresql://
-    if engine_url:
-        engine_url = re.sub(r'^postgres(ql)?://', 'postgresql+asyncpg://', engine_url)
-    
+    engine_url = engine_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    engine_url = engine_url.replace("postgres://", "postgresql+asyncpg://", 1)
+
     engine = create_async_engine(engine_url, echo=False, connect_args=connect_args)
 else:
-    raise ValueError("DATABASE_URL no está configurada en las variables de entorno.")
+    raise ValueError("DATABASE_URL no está configurada.")
 
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
