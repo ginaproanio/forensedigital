@@ -1075,7 +1075,39 @@ Claude Code genera SOLO las variables del proveedor elegido (no las de los otros
 ANTHROPIC_API_KEY=sk-ant-...
 
 # Proveedor de WhatsApp
-WHATSAPP_PROVIDER=  # meta | twilio
+WHATSAPP_PROVIDER=meta  # meta | whapi
+
+## 8. Especificaciones Técnicas de Base de Datos (Producción)
+
+Para el correcto funcionamiento en Railway con Supabase, se deben seguir estas reglas críticas debido a las limitaciones del driver `asyncpg` y el Transaction Pooler:
+
+### 8.1. Estructura de la DATABASE_URL
+La URL en Railway debe seguir este formato exacto:
+`postgresql+asyncpg://postgres.[ID_PROYECTO]:[PASSWORD]@[HOST_POOLER]:6543/postgres?ssl=true&options=-c%20search_path%3Dsorsabsa_identity`
+
+### 8.2. Hallazgos Críticos de Conectividad (Lecciones Aprendidas)
+1. **El Host (.com vs .co):** 
+   - El API de Supabase usa `.co` (ej. `tkkpqbelzwoenmeynjvw.supabase.co`).
+   - El Pooler de Base de Datos (puerto 6543) **SIEMPRE usa .com** (ej. `aws-1-us-west-2.pooler.supabase.com`). Usar `.co` resultará en un `gaierror` (Name not known).
+
+2. **El Usuario (Tenant Isolation):**
+   - Al usar el puerto `6543`, el usuario no puede ser solo `postgres`.
+   - Debe ser `postgres.[ID_PROYECTO]` para que el pooler sepa a qué instancia redirigir la conexión.
+
+3. **Región Física:**
+   - Es vital verificar si el proyecto está en `us-east-1` (aws-0) o `us-west-2` (aws-1). Un error de región devolverá "Tenant not found".
+
+4. **Compatibilidad asyncpg + PgBouncer:**
+   - **SSL:** `asyncpg` no acepta `ssl=true`. El código en `database.py` traduce automáticamente esto a `ssl=require`.
+   - **Statement Cache:** PgBouncer en modo transacción no soporta sentencias preparadas. El motor de SQLAlchemy **DEBE** configurarse con `statement_cache_size=0`.
+   - **Parámetro options:** El driver no acepta `options` en la URL. `database.py` lo extrae para configurar el `search_path` en los `server_settings`.
+
+### 8.3. Esquema de Datos
+- El agente opera exclusivamente bajo el esquema: `sorsabsa_identity`.
+- Tablas principales:
+  - `agent_messages`: Historial de conversación.
+  - `processed_messages`: Deduplicación de Webhooks de WhatsApp.
+  - `google_tokens`: Persistencia del OAuth de Calendar.
 
 # --- Si WHATSAPP_PROVIDER=meta ---
 # META_ACCESS_TOKEN=...

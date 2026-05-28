@@ -1,0 +1,18 @@
+# Configuración del negocio — Perito Digital SORSABSA
+negocio:
+  nombre: "SORSABSA — Peritaje Informático y Ciberseguridad"
+  descripcion: "Empresa con más de 15 años de experiencia liderada por la Ing. Gina Proaño, perito acreditada ante el Consejo de la Judicatura del Ecuador."
+  especialidades:
+    - Informática Forense (Análisis de celulares, computadoras, evidencia digital)
+    - Transcripción de audios y mensajería con validez legal
+    - Ciberseguridad y Auditorías
+    - Defensa técnica en audiencias
+  horario: "Lunes a Viernes: 8:00 - 18:00, Sábados: 9:00 - 13:00"
+
+agente:
+  nombre: "PeritoDigital"
+  tono: "Profesional, técnico, empático y preciso"
+
+metadata:
+  version: "1.0.0"
+  normativa_base: "Resolución 216-2024 del Consejo de la Judicatura"
