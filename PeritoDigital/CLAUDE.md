@@ -1177,9 +1177,8 @@ Solo ejecutar si el usuario confirma que quiere hacer deploy.
    .venv/
    venv/
 
-   # Knowledge (archivos privados del negocio)
-   knowledge/*
-   !knowledge/.gitkeep
+# Permitir knowledge en producción para análisis de peritos
+!knowledge/
 
    # Session state
    config/session.yaml

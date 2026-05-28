@@ -17,9 +17,8 @@ env/
 dist/
 build/
 
-# Knowledge (archivos privados del negocio)
-knowledge/*
-!knowledge/.gitkeep
+# Permitir knowledge en producción para que el agente tenga acceso a reglamentos y matriz
+!knowledge/
 
 # Archivos generados por Claude Code durante onboarding (temporal)
 # agent/
