@@ -19,12 +19,13 @@ connect_args = {}
 
 if DATABASE_URL:
     # 2. Normalización de Esquema para parsing correcto
-    # urlparse falla con esquemas que contienen '+' (como postgresql+asyncpg)
-    # convirtiendo todo el host en parte del path.
-    clean_url = DATABASE_URL
-    if "://" in clean_url:
-        scheme_part = clean_url.split("://")[0]
-        clean_url = clean_url.replace(scheme_part + "://", "postgresql://", 1)
+    # Normalización forense: urlparse no identifica el netloc (host) si el esquema tiene '+'
+    temp_url = DATABASE_URL
+    original_scheme = DATABASE_URL.split("://")[0] if "://" in DATABASE_URL else "postgresql"
+    if "+" in original_scheme:
+        clean_url = DATABASE_URL.replace(original_scheme + "://", "postgresql://", 1)
+    else:
+        clean_url = DATABASE_URL
 
     parsed_url = urlparse.urlparse(clean_url)
     query_params = urlparse.parse_qs(parsed_url.query)
@@ -60,16 +61,19 @@ if DATABASE_URL:
     # Construir manualmente para evitar errores de urlunparse con puertos y credenciales
     port_str = f":{parsed_url.port}" if parsed_url.port else ""
     
-    # Manejo robusto de credenciales para evitar el string 'None'
     user_part = parsed_url.username or ""
     pass_part = f":{parsed_url.password}" if parsed_url.password else ""
     auth_str = f"{user_part}{pass_part}@" if user_part else ""
     
+    # Aseguramos el driver asyncpg y el host limpio
     engine_url = f"postgresql+asyncpg://{auth_str}{hostname}{port_str}{parsed_url.path}{query_str}"
 
     # LOG DE AUDITORÍA: Verificar host y usuario en logs de Railway sin exponer password
     obfuscated_url = f"postgresql+asyncpg://{parsed_url.username}:****@{hostname}{port_str}{parsed_url.path}"
     print(f"🔍 [DATABASE] Intentando conexión a: {obfuscated_url}")
+
+    # REGLA CRÍTICA: Desactivar caché de sentencias preparadas para PgBouncer (puerto 6543)
+    connect_args["statement_cache_size"] = 0
 
     engine = create_async_engine(engine_url, echo=False, connect_args=connect_args)
 else:
