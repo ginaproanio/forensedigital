@@ -31,6 +31,10 @@ if DATABASE_URL:
         # Eliminar 'options' para evitar el TypeError en el driver asyncpg
         del query_params["options"]
     
+    # Mapeo forense: asyncpg no acepta ssl=true, requiere un modo específico
+    if "ssl" in query_params and query_params["ssl"][0].lower() == "true":
+        query_params["ssl"] = ["require"]
+    
     # Reconstruir la URL sin el parámetro 'options'
     new_query = urlparse.urlencode(query_params, doseq=True)
     engine_url = parsed_url._replace(query=new_query).geturl()
