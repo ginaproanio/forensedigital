@@ -23,6 +23,11 @@ logger = logging.getLogger("peritodigital")
 
 app = FastAPI(title="PeritoDigital Agent API")
 
+@app.get("/")
+async def root():
+    """Mensaje de bienvenida para confirmar que el servidor está activo."""
+    return {"status": "online", "agent": "PeritoDigital", "version": "1.0.0", "message": "SORSABSA API operativa"}
+
 ADMIN_PHONE = os.getenv("ADMIN_PHONE_NUMBER") # Tu número para recibir alertas
 
 @app.on_event("startup")
