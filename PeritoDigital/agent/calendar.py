@@ -19,8 +19,7 @@ logger = logging.getLogger(__name__)
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 # Ruta al archivo de credenciales OAuth (en la raíz del proyecto)
-# CLIENT_SECRET_FILE = os.path.join(os.path.dirname(__file__), "..", "client_secret.json") # Ya no se usa archivo
-# TOKEN_FILE = os.path.join(os.path.dirname(__file__), "..", "token.json") # Ya no se usa archivo
+CLIENT_SECRET_FILE = os.path.join(os.path.dirname(__file__), "..", "client_secret.json")
 
 REDIRECT_URI = os.getenv(
     "GOOGLE_REDIRECT_URI",
@@ -69,7 +68,7 @@ def get_credentials() -> Credentials | None:
         # Refresh si es necesario
         if creds.expired and creds.refresh_token:
             creds.refresh(GoogleAuthRequest()) # Usamos el Request correcto de google.auth
-            save_credentials(creds) # Guardar el token refrescado
+            await save_credentials(creds) # Guardar el token refrescado
         return creds
     except Exception as e:
         logger.error(f"Error cargando token: {e}")
@@ -99,7 +98,7 @@ def get_calendar_url() -> str:
     return authorization_url
 
 
-def autorizar_calendar(code: str):
+async def autorizar_calendar(code: str):
     """
     Completa el flujo OAuth con el código de autorización.
     Guarda las credenciales en token.json.
@@ -132,7 +131,7 @@ async def crear_evento_consulta(
     Returns:
         dict con los datos del evento creado, o None si falló
     """
-    creds = get_credentials()
+    creds = await get_credentials()
     if not creds:
         logger.error("❌ No hay credenciales de Google Calendar. Ejecuta /oauth/start primero.")
         return None
@@ -182,13 +181,13 @@ async def crear_evento_consulta(
         return None
 
 
-def calendario_autorizado() -> bool:
+async def calendario_autorizado() -> bool:
     """Verifica si ya hay credenciales válidas."""
-    creds = get_credentials()
+    creds = await get_credentials()
     return creds is not None and creds.valid
 
 
-def listar_proximas_citas(dias: int = 7) -> list[dict]:
+async def listar_proximas_citas(dias: int = 7) -> list[dict]:
     """
     Lista las citas próximas en el calendario.
     
@@ -198,7 +197,7 @@ def listar_proximas_citas(dias: int = 7) -> list[dict]:
     Returns:
         Lista de eventos próximos
     """
-    creds = get_credentials()
+    creds = await get_credentials()
     if not creds:
         return []
     
