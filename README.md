@@ -50,7 +50,12 @@ El corazón técnico de Sorsabsa es el orquestador maestro en la raíz. Se aband
 - **[Log de Transición Docker](DOCKER_TRANSITION_LOG.md)**: Registro de deuda técnica y problemas superados en la migración.
 - **[Matriz de Servicios](SORSABSA%20Matriz%20de%20Servicios.md)**: Estado de integración de cada módulo.
   
-### 🛠️ Cómo declarar un proyecto faltante
+### 🛡️ Gestión de Claves (IMPORTANTE)
+**Nunca** subas el archivo `.env` a GitHub. 
+En producción (Railway), las claves deben configurarse en la pestaña **Variables** del Dashboard. 
+El sistema de Railway es **efímero**: cualquier archivo creado manualmente en el servidor se borrará en el siguiente despliegue.
+
+### �️ Cómo declarar un proyecto faltante
 Para que los proyectos se integren, deben añadirse al archivo `C:\Sorsabsa\docker-compose.yml` siguiendo este formato:
 
 ```yaml

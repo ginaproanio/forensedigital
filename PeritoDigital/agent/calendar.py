@@ -7,12 +7,16 @@ import base64
 import json
 import logging
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 from google.oauth2.credentials import Credentials # Importamos Credentials
 from google.auth.transport.requests import Request as GoogleAuthRequest # Importamos Request para el refresh
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from agent.memory import save_google_token, get_google_token # Importamos las funciones de memoria
+
+# Cargar variables de entorno
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +27,7 @@ CLIENT_SECRET_FILE = os.path.join(os.path.dirname(__file__), "..", "client_secre
 
 REDIRECT_URI = os.getenv(
     "GOOGLE_REDIRECT_URI",
-    "https://peritodigital-production.up.railway.app/oauth/callback"
+    "https://forensedigital-production.up.railway.app/oauth/callback"
 )
 
 
@@ -51,9 +55,9 @@ def get_flow() -> Flow:
 
 
 
-def get_credentials() -> Credentials | None:
+async def get_credentials() -> Credentials | None:
     """Carga las credenciales guardadas del token."""
-    token_data = get_google_token() # Intenta cargar desde la DB
+    token_data = await get_google_token() # Intenta cargar desde la DB
     if not token_data:
         return None
     try:

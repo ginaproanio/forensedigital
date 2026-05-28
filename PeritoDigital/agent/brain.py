@@ -5,8 +5,12 @@ import logging
 import re
 from datetime import datetime
 from anthropic import AsyncAnthropic
+from dotenv import load_dotenv
 from .knowledge import cargar_conocimiento
 from .calendar import crear_evento_consulta, calendario_autorizado
+
+# Cargar variables de entorno
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +115,7 @@ def limpiar_respuesta(respuesta: str) -> str:
 async def procesar_cita(datos_cita: dict, telefono: str):
     """Crea el evento en Google Calendar con los datos de la cita."""
     try:
-        if not calendario_autorizado():
+        if not await calendario_autorizado():
             logger.warning("⚠️ Google Calendar no autorizado — cita no agendada en calendario")
             return
         

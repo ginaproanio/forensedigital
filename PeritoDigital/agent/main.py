@@ -2,6 +2,7 @@ import os
 import logging
 import asyncio
 import httpx
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Query, Response, HTTPException # Importamos HTTPException
 from .brain import generar_respuesta
 from .database import (
@@ -12,6 +13,9 @@ from .database import (
     guardar_mensaje
 )
 from .calendar import get_calendar_url, autorizar_calendar, calendario_autorizado # Importamos calendario_autorizado
+
+# Cargar variables de entorno desde .env
+load_dotenv()
 
 # Configuración de logs
 logging.basicConfig(level=logging.INFO)
