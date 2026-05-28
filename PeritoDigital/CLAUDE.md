@@ -779,11 +779,31 @@ load_dotenv()
 # Configuración de base de datos
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./agentkit.db")
 
-# Si es PostgreSQL en producción, ajustar el esquema de URL
-if DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+connect_args = {}
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+# Si es PostgreSQL en producción, ajustar el esquema de URL
+if "postgresql" in DATABASE_URL:
+    if DATABASE_URL.startswith("postgresql://"):
+        DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+    
+    # Extraer el search_path del parámetro 'options' para asyncpg (necesario para Supabase)
+    if "options=" in DATABASE_URL:
+        import urllib.parse as urlparse
+        parsed_url = urlparse.urlparse(DATABASE_URL)
+        query_params = urlparse.parse_qs(parsed_url.query)
+        
+        if "options" in query_params:
+            opt_val = query_params["options"][0]
+            if "search_path=" in opt_val:
+                # Extraer el nombre del esquema (ej: sorsabsa_identity)
+                schema = opt_val.split("search_path=")[1].split()[0]
+                connect_args["server_settings"] = {"search_path": schema}
+        
+        # Limpiar la URL de 'options' para evitar el TypeError en el driver asyncpg
+        new_query = {k: v for k, v in query_params.items() if k != "options"}
+        DATABASE_URL = parsed_url._replace(query=urlparse.urlencode(new_query, doseq=True)).geturl()
+
+engine = create_async_engine(DATABASE_URL, connect_args=connect_args, echo=False)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
