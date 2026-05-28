@@ -55,7 +55,7 @@ if DATABASE_URL:
         query_params["ssl"] = ["require"]
     
     # 6. Reconstrucción de la URL final con el driver asyncpg
-    new_query = urlparse.urlencode(query_params, doseq=True)
+    query_str = f"?{urlparse.urlencode(query_params, doseq=True)}" if query_params else ""
     
     # Construir manualmente para evitar errores de urlunparse con puertos y credenciales
     port_str = f":{parsed_url.port}" if parsed_url.port else ""
@@ -65,7 +65,7 @@ if DATABASE_URL:
     pass_part = f":{parsed_url.password}" if parsed_url.password else ""
     auth_str = f"{user_part}{pass_part}@" if user_part else ""
     
-    engine_url = f"postgresql+asyncpg://{auth_str}{hostname}{port_str}{parsed_url.path}?{new_query}"
+    engine_url = f"postgresql+asyncpg://{auth_str}{hostname}{port_str}{parsed_url.path}{query_str}"
 
     # LOG DE AUDITORÍA: Verificar host y usuario en logs de Railway sin exponer password
     obfuscated_url = f"postgresql+asyncpg://{parsed_url.username}:****@{hostname}{port_str}{parsed_url.path}"
