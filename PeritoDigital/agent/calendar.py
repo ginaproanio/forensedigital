@@ -3,23 +3,24 @@ Integración con Google Calendar para PeritoDigital.
 Crea eventos automáticamente cuando el bot agenda una consulta.
 """
 import os
+import base64
 import json
 import logging
 from datetime import datetime, timedelta
-from google.oauth2.credentials import Credentials
+from google.oauth2.credentials import Credentials # Importamos Credentials
+from google.auth.transport.requests import Request as GoogleAuthRequest # Importamos Request para el refresh
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from agent.memory import save_google_token, get_google_token # Importamos las funciones de memoria
 
 logger = logging.getLogger(__name__)
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 # Ruta al archivo de credenciales OAuth (en la raíz del proyecto)
-CLIENT_SECRET_FILE = os.path.join(os.path.dirname(__file__), "..", "client_secret.json")
-
-# Token guardado (se genera tras la primera autorización)
-TOKEN_FILE = os.path.join(os.path.dirname(__file__), "..", "token.json")
+# CLIENT_SECRET_FILE = os.path.join(os.path.dirname(__file__), "..", "client_secret.json") # Ya no se usa archivo
+# TOKEN_FILE = os.path.join(os.path.dirname(__file__), "..", "token.json") # Ya no se usa archivo
 
 REDIRECT_URI = os.getenv(
     "GOOGLE_REDIRECT_URI",
@@ -29,25 +30,34 @@ REDIRECT_URI = os.getenv(
 
 def get_flow() -> Flow:
     """Crea el flujo OAuth con las credenciales del archivo JSON."""
-    if not os.path.exists(CLIENT_SECRET_FILE):
-        logger.error(f"❌ No se encuentra {CLIENT_SECRET_FILE}. Descarga las credenciales de Google Cloud.")
-        raise FileNotFoundError(f"Archivo de credenciales no encontrado: {CLIENT_SECRET_FILE}")
-    
-    flow = Flow.from_client_secrets_file(
-        CLIENT_SECRET_FILE,
-        scopes=SCOPES,
-        redirect_uri=REDIRECT_URI,
-    )
-    return flow
+    # 1. Intentar cargar desde variable de entorno (Recomendado para Railway)
+    env_json = os.getenv("GOOGLE_CLIENT_SECRET_JSON")
+    if env_json:
+        try:
+            client_config = json.loads(base64.b64decode(env_json))
+            return Flow.from_client_config(
+                client_config,
+                scopes=SCOPES,
+                redirect_uri=REDIRECT_URI
+            )
+        except Exception as e:
+            logger.error(f"❌ Error decodificando GOOGLE_CLIENT_SECRET_JSON: {e}")
+
+    # 2. Fallback al archivo físico
+    if os.path.exists(CLIENT_SECRET_FILE):
+        return Flow.from_client_secrets_file(CLIENT_SECRET_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI)
+
+    logger.error("❌ No se encontraron credenciales de Google (Variable o Archivo).")
+    raise FileNotFoundError("Credenciales de Google no encontradas.")
+
 
 
 def get_credentials() -> Credentials | None:
     """Carga las credenciales guardadas del token."""
-    if not os.path.exists(TOKEN_FILE):
+    token_data = get_google_token() # Intenta cargar desde la DB
+    if not token_data:
         return None
     try:
-        with open(TOKEN_FILE, "r") as f:
-            token_data = json.load(f)
         creds = Credentials(
             token=token_data.get("token"),
             refresh_token=token_data.get("refresh_token"),
@@ -58,23 +68,23 @@ def get_credentials() -> Credentials | None:
         )
         # Refresh si es necesario
         if creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            creds.refresh(GoogleAuthRequest()) # Usamos el Request correcto de google.auth
+            save_credentials(creds) # Guardar el token refrescado
         return creds
     except Exception as e:
         logger.error(f"Error cargando token: {e}")
         return None
 
 
-def save_credentials(creds: Credentials):
-    """Guarda las credenciales en token.json."""
+async def save_credentials(creds: Credentials):
+    """Guarda las credenciales en la base de datos."""
     token_data = {
         "token": creds.token,
         "refresh_token": creds.refresh_token,
         "client_id": creds.client_id,
         "client_secret": creds.client_secret,
     }
-    with open(TOKEN_FILE, "w") as f:
-        json.dump(token_data, f, indent=2)
+    await save_google_token(token_data) # Guardar en la DB
     logger.info("✅ Token de Google Calendar guardado")
 
 
@@ -96,8 +106,8 @@ def autorizar_calendar(code: str):
     """
     flow = get_flow()
     flow.fetch_token(code=code)
-    creds = flow.credentials
-    save_credentials(creds)
+    creds = flow.credentials # Obtiene las credenciales
+    await save_credentials(creds) # Guarda las credenciales en la DB
     logger.info("✅ Google Calendar autorizado exitosamente")
     return creds
 

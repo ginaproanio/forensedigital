@@ -1,7 +1,9 @@
 import os
+import os
 import logging
 import asyncio
-from fastapi import FastAPI, Request
+import httpx
+from fastapi import FastAPI, Request, Query, Response, HTTPException # Importamos HTTPException
 from .brain import generar_respuesta
 from .database import (
     init_db,
@@ -10,6 +12,7 @@ from .database import (
     obtener_historial,
     guardar_mensaje
 )
+from .calendar import get_calendar_url, autorizar_calendar, calendario_autorizado # Importamos calendario_autorizado
 
 # Configuración de logs
 logging.basicConfig(level=logging.INFO)
@@ -22,8 +25,39 @@ ADMIN_PHONE = os.getenv("ADMIN_PHONE_NUMBER") # Tu número para recibir alertas
 @app.on_event("startup")
 async def startup_event():
     """Inicializa la base de datos al arrancar el contenedor."""
-    await init_db()
+    await init_db() # init_db ahora también creará la tabla google_tokens
     logger.info("🚀 Base de Datos (PostgreSQL/Supabase) inicializada correctamente")
+
+@app.get("/webhook")
+async def webhook_verification(
+    hub_mode: str = Query(None, alias="hub.mode"),
+    hub_challenge: str = Query(None, alias="hub.challenge"),
+    hub_verify_token: str = Query(None, alias="hub.verify_token")
+):
+    """Maneja el 'handshake' inicial de Meta para validar el webhook."""
+    verify_token = os.getenv("META_VERIFY_TOKEN")
+    if hub_mode == "subscribe" and hub_verify_token == verify_token:
+        logger.info("✅ Webhook verificado exitosamente por Meta")
+        return Response(content=str(hub_challenge), media_type="text/plain")
+    return Response(content="Token de verificación inválido", status_code=403)
+
+@app.get("/oauth/start")
+async def oauth_start():
+    """Inicia el proceso de vinculación con Google Calendar."""
+    return {"url": get_calendar_url()}
+
+@app.get("/oauth/callback")
+async def oauth_callback(request: Request):
+    """Recibe el código de Google y activa el calendario."""
+    code = request.query_params.get("code")
+    if not code:
+        return {"error": "No se proporcionó el código de autorización"}
+    
+    try:
+        await autorizar_calendar(code) # Ahora es awaitable
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al autorizar Google Calendar: {e}")
+    return {"status": "ok", "message": "Google Calendar de SORSABSA activado correctamente"}
 
 @app.post("/webhook")
 async def webhook_handler(request: Request):
