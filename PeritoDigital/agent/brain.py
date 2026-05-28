@@ -49,12 +49,12 @@ AGENDAMIENTO DE CITAS:
   un bloque JSON exactamente así (sin texto adicional después del JSON):
 
 CITA_CONFIRMADA:
-{
+{{
   "nombre": "Nombre del cliente",
   "fecha": "YYYY-MM-DD",
   "hora": "HH:MM",
   "descripcion": "Breve descripción del caso o motivo de consulta"
-}
+}}
 
 - Solo incluye el bloque CITA_CONFIRMADA cuando tengas los 3 datos confirmados por el cliente
 - Después de confirmar la cita, dile al cliente que recibirá una confirmación
