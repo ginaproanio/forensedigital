@@ -13,7 +13,7 @@ from google.auth.transport.requests import Request as GoogleAuthRequest # Import
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from agent.memory import save_google_token, get_google_token # Importamos las funciones de memoria
+from .database import save_google_token, get_google_token # Importamos las funciones de persistencia
 
 # Cargar variables de entorno
 load_dotenv()

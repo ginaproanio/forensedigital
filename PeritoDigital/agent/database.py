@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Text, DateTime, select, Integer
+from sqlalchemy import String, Text, DateTime, select, Integer, JSON
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
@@ -40,6 +40,35 @@ class ProcessedMessage(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     message_id: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+class GoogleToken(Base):
+    """Modelo para almacenar el token de Google Calendar de forma persistente."""
+    __tablename__ = "google_tokens"
+    __table_args__ = {"schema": "sorsabsa_identity"}
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    token_data: Mapped[dict] = mapped_column(JSON, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+async def save_google_token(token_data: dict):
+    """Guarda o actualiza el token de Google en la base de datos."""
+    async with async_session() as session:
+        stmt = select(GoogleToken).where(GoogleToken.id == 1)
+        result = await session.execute(stmt)
+        existing_token = result.scalar_one_or_none()
+        if existing_token:
+            existing_token.token_data = token_data
+        else:
+            session.add(GoogleToken(id=1, token_data=token_data))
+        await session.commit()
+
+async def get_google_token() -> dict | None:
+    """Recupera el token de Google de la base de datos."""
+    async with async_session() as session:
+        stmt = select(GoogleToken).where(GoogleToken.id == 1)
+        result = await session.execute(stmt)
+        token_entry = result.scalar_one_or_none()
+        return token_entry.token_data if token_entry else None
 
 async def init_db():
     """Crea las tablas en el esquema identity si no existen."""
