@@ -37,9 +37,9 @@ async def webhook_verification(
     hub_challenge: str = Query(None, alias="hub.challenge"),
     hub_verify_token: str = Query(None, alias="hub.verify_token")
 ):
-    """Maneja el 'handshake' inicial de Meta para validar el webhook."""
+    """Maneja la verificación oficial de Meta (WhatsApp/Instagram)."""
     verify_token = os.getenv("META_VERIFY_TOKEN")
-    if hub_mode == "subscribe" and hub_verify_token == verify_token:
+    if hub_mode == "subscribe" and str(hub_verify_token) == str(verify_token):
         logger.info("✅ Webhook verificado exitosamente por Meta")
         return Response(content=str(hub_challenge), media_type="text/plain")
     return Response(content="Token de verificación inválido", status_code=403)
